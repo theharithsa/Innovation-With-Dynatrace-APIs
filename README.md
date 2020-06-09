@@ -3,7 +3,7 @@
 ### Host Details
 Tool for fetching host details that are installed with OneAgent.
 
-# What it Uses?
+### What it Uses?
 This uses Dynatrace APIs to fetch the host details that are monitored in the Dynatrace portal. 
 
 # Get Started
