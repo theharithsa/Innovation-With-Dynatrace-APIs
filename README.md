@@ -1,4 +1,6 @@
-# Dynatrace Host-Details
+# Dynatrace Entity List Utility
+## Current State
+### Host Details
 Tool for fetching host details that are installed with OneAgent.
 
 # What it Uses?
