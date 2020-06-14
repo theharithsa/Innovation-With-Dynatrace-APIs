@@ -1,13 +1,19 @@
 # Dynatrace Entity List Utility
 ## Current State
 ### Host Details
-Tool for fetching host details that are installed with OneAgent.
+Tool for fetching host details that are installed with OneAgent. It will fetch all the hosts that are installed with OneAgent even if it is disabled. 
+
+### Fetch Problems in Dynatrace Environment
+Problem details will be fetched from the Dynatrace Environment. Problem details, such as Problem **Display Name, Status, Root Cause (Boolean), Impacted Entity, Start Time, and End Time** of all the problems specified in the given timeline. 
 
 ### What it Uses?
 This uses Dynatrace APIs to fetch the host details that are monitored in the Dynatrace portal. 
 
 # Get Started
 This tool supports offline installation thus, you can clone it and run it anywhere. As an online version, it is hosted in Firebase. To access, please visit [here](https://dtis-hosts.web.app)
+
+* Host Details: [here](https://dtis-hosts.web.app)
+* Problem Details: [here](https://dtis-hosts.web.app/problems.html)
 
 ### Conditions to access Online Version
 Please make sure, Dynatrace Tenant is accessible for the internet and also it is configured with an SSL certificate. 
@@ -19,9 +25,24 @@ No servers need to be installed to run the application. Just copy all the files 
 Since this is an open-source, feel free to contribute to this project and we suggest you add more features other than fetching only hosts data. 
 
 # Future Updates
-We will update to all sets of APIs other than hosts in the environment. 
+We will update to all sets of APIs other than hosts in the environment.
 
 # Libraries Used
 1. Materialize for Frontend
 2. Datatables to display data
 
+# Comapitability Browsers
+* Microsoft Edge
+* Google Chrome
+* Mozilla Firefox
+
+<small>Please use the latest browser for better experience</small>
+
+# Commit Changes
+## v0.0.2
+* Added Problem Details Fetch
+* Bug Fixes
+
+## v0.0.1
+* Fetch Host Details
+* Initial Commit
