@@ -32,7 +32,7 @@ We will update to all sets of APIs other than hosts in the environment.
 1. Materialize for Frontend
 2. Datatables to display data
 
-## Comapitability Browsers
+## Compaitability Browsers
 * Microsoft Edge
 * Google Chrome
 * Mozilla Firefox
