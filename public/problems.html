@@ -2,6 +2,7 @@
 <html>
 
 <head>
+    <meta charset="utf-8">
     <title>Dynatrace Problem Details</title>
     <link rel="stylesheet" type="text/css" href="DataTables/css/jquery.dataTables.css">
     <!-- Compiled and minified CSS -->
@@ -78,11 +79,13 @@
                             <th>Display Name</th>
                             <th>Severity Level</th>
                             <th>Status</th>
+                            <th>Tag(s)</th>
                             <th>Start Time</th>
                             <th>End Time</th>
                             <th>Affected Entity</th>
                             <th>Event Type</th>
                             <th>Root Cause Availability</th>
+                            
                         </tr>
                     </thead>
                     <tbody id="include">
@@ -151,7 +154,6 @@
                         alert('Something went wrong: ' + err);
                     } else {
                         var requestJson = data.result.problems;
-                        console.log(requestJson[0]);
                         setTimeout(function () {
                             $('#example').DataTable({
                                 dom: 'Bfrtip',
@@ -166,16 +168,18 @@
                         for (i = 0; i < requestJson.length; i++) {
                             if (requestJson[i].hasOwnProperty("id")) {
                                 if (requestJson[i].hasOwnProperty("rankedImpacts")) {
-                                    console.log(requestJson[i].rankedImpacts);
-                                    displayFormData(tenantURL, requestJson[i].id, requestJson[i].displayName, requestJson[i]
-                                        .severityLevel, requestJson[i].status, convertMillis(
-                                            requestJson[i].startTime), convertMillis(requestJson[i]
-                                            .endTime), getEntityIDs(requestJson[i].rankedImpacts),
-                                        getEventType(requestJson[i].rankedImpacts), requestJson[i]
-                                        .hasRootCause);
+                                    if(requestJson[i].tagsOfAffectedEntities.length > 0) {
+                                            displayFormData(tenantURL, requestJson[i].id, requestJson[i].displayName, requestJson[i]
+                                            .severityLevel, requestJson[i].status, requestJson[i].tagsOfAffectedEntities[0].key, convertMillis(
+                                                requestJson[i].startTime), convertMillis(requestJson[i]
+                                                .endTime), getEntityIDs(requestJson[i].rankedImpacts),
+                                            getEventType(requestJson[i].rankedImpacts), requestJson[i]
+                                            .hasRootCause);
+                                    }
+
                                 } else {
                                     displayFormData(requestJson[i].displayName, requestJson[i]
-                                        .severityLevel, requestJson[i].status, convertMillis(
+                                        .severityLevel, requestJson[i].status, "NA", convertMillis(
                                             requestJson[i].startTime), convertMillis(requestJson[i]
                                             .endTime), "NA", "NA", requestJson[i].hasRootCause);
                                 }
@@ -189,10 +193,9 @@
 
         });
 
-        function displayFormData(tenantURL, problemID, displayName, sLevel, status, startTime, endTime, affectedEntity, eventType,
+        function displayFormData(tenantURL, problemID, displayName, sLevel, status, tags, startTime, endTime, affectedEntity, eventType,
             rootCause) {
             var a = document.createElement("tr");
-
      
             var b = document.createElement("td");
             var anchor = document.createElement('a');
@@ -208,6 +211,10 @@
             var d = document.createElement("td");
             var dText = document.createTextNode(status)
             d.appendChild(dText);
+
+            var j = document.createElement("td");
+            var jText = document.createTextNode(tags)
+            j.appendChild(jText);
 
             var e = document.createElement("td");
             var eText = document.createTextNode(startTime)
@@ -234,18 +241,21 @@
             a.appendChild(b);
             a.appendChild(c);
             a.appendChild(d);
+            a.appendChild(j);
             a.appendChild(e);
             a.appendChild(f);
             a.appendChild(g);
             a.appendChild(i);
             a.appendChild(h);
+            
         }
 
         function convertMillis(time) {
             resultTime = new Date(time);
-            var res = resultTime.toLocaleString();
-            console.log(res);
-            return res;
+            if (time == -1){
+                return "-";
+            } else 
+                return resultTime.toLocaleString();
         }
 
         function getEntityIDs(entityData) {
@@ -253,9 +263,18 @@
             for (j = 0; j < entityData.length; j++) {
                 res = res + " " + entityData[j].entityName;
             }
-            console.log(res)
             return res;
         }
+
+       /* Adding Multiple tags to the rows
+        function getTags(tags) {
+            var res = tags;
+            for (j = 1; j < tags.length; j++) {
+                res = res + ", " + tags[j].key;
+            }
+            return res;
+        } 
+        */
 
         function getEventType(sameEntityData) {
             var sameRes = "";
