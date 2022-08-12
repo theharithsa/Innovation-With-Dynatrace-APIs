@@ -47,18 +47,18 @@
                         <div class="input-field col s6">
                             <select id="timeframe">
                                 <option value="" disabled selected>Choose your option</option>
-                                <option value="min">1 min</option>
-                                <option value="5mins">5 mins</option>
-                                <option value="10mins">10 mins</option>
-                                <option value="15mins">15 mins</option>
-                                <option value="30mins">30 mins</option>
-                                <option value="hour">1 hour</option>
-                                <option value="2hours">2 hours</option>
-                                <option value="6hours">6 hours</option>
-                                <option value="day">24 hours</option>
-                                <option value="3days">3 days</option>
-                                <option value="week">last week</option>
-                                <option value="month">month</option>
+                                <option value="-1m">1 min</option>
+                                <option value="-5m">5 mins</option>
+                                <option value="-10m">10 mins</option>
+                                <option value="-15m">15 mins</option>
+                                <option value="-30m">30 mins</option>
+                                <option value="-1h">1 hour</option>
+                                <option value="-2h">2 hours</option>
+                                <option value="-6h">6 hours</option>
+                                <option value="-1d">24 hours</option>
+                                <option value="-3d">3 days</option>
+                                <option value="-7d">last week</option>
+                                <option value="-1M">month</option>
                             </select>
                             <label>Select Timeframe</label>
                         </div>
@@ -146,14 +146,14 @@
             var timeframe = document.getElementById('timeframe').value
             var tenantURL = document.getElementById('tenant').value;
             var apiKey = document.getElementById('apiToken').value;
-            console.log(tenantURL + '/api/v1/problem/feed?relativeTime=' + timeframe + '&Api-Token=' + apiKey);
+            console.log(tenantURL + '/api/v2/problems?from=' + timeframe + '&Api-Token=' + apiKey);
 
-            getJSON(tenantURL + '/api/v1/problem/feed?relativeTime=' + timeframe + '&Api-Token=' + apiKey,
+            getJSON(tenantURL + '/api/v2/problems?from=' + timeframe + '&Api-Token=' + apiKey,
                 function (err, data) {
                     if (err !== null) {
                         alert('Something went wrong: ' + err);
                     } else {
-                        var requestJson = data.result.problems;
+                        var requestJson = data.problems;
                         setTimeout(function () {
                             $('#example').DataTable({
                                 dom: 'Bfrtip',
@@ -166,23 +166,23 @@
                         }, 2000);
 
                         for (i = 0; i < requestJson.length; i++) {
-                            if (requestJson[i].hasOwnProperty("id")) {
-                                if (requestJson[i].hasOwnProperty("rankedImpacts")) {
-                                    if(requestJson[i].tagsOfAffectedEntities.length > 0) {
-                                            displayFormData(tenantURL, requestJson[i].id, requestJson[i].displayName, requestJson[i]
-                                            .severityLevel, requestJson[i].status, requestJson[i].tagsOfAffectedEntities[0].key, convertMillis(
+                            if (requestJson[i].hasOwnProperty("problemId")) {
+                                if (requestJson[i].entityTags.length == 0) {
+                                    displayFormData(tenantURL, requestJson[i].problemId, requestJson[i].displayId, requestJson[i]
+                                            .severityLevel, requestJson[i].status, "", convertMillis(
                                                 requestJson[i].startTime), convertMillis(requestJson[i]
-                                                .endTime), getEntityIDs(requestJson[i].rankedImpacts),
-                                            getEventType(requestJson[i].rankedImpacts), requestJson[i]
-                                            .hasRootCause);
-                                    }
+                                                .endTime), getEntityIDs(requestJson[i].affectedEntities),
+                                                requestJson[i].title, isRootCause(requestJson[i]
+                                                .rootCauseEntity));
 
-                                } else {
-                                    displayFormData(requestJson[i].displayName, requestJson[i]
-                                        .severityLevel, requestJson[i].status, "NA", convertMillis(
-                                            requestJson[i].startTime), convertMillis(requestJson[i]
-                                            .endTime), "NA", "NA", requestJson[i].hasRootCause);
-                                }
+                                } else{
+                                    displayFormData(tenantURL, requestJson[i].problemId, requestJson[i].displayId, requestJson[i]
+                                                .severityLevel, requestJson[i].status, requestJson[i].entityTags[0].key, convertMillis(
+                                                    requestJson[i].startTime), convertMillis(requestJson[i]
+                                                    .endTime), getEntityIDs(requestJson[i].affectedEntities),
+                                                    requestJson[i].title, isRootCause(requestJson[i]
+                                                .rootCauseEntity));                             
+                                } 
 
                             } else {
                                 alert('Problems are not found for this specific timeline');
@@ -261,7 +261,7 @@
         function getEntityIDs(entityData) {
             var res = "";
             for (j = 0; j < entityData.length; j++) {
-                res = res + " " + entityData[j].entityName;
+                res = res + " " + entityData[j].name;
             }
             return res;
         }
@@ -276,13 +276,12 @@
         } 
         */
 
-        function getEventType(sameEntityData) {
-            var sameRes = "";
-            for (k = 0; k < sameEntityData.length; k++) {
-                sameRes = sameRes + " " + sameEntityData[k].eventType;
+        function isRootCause(rootCauseEntity) {
+            if(rootCauseEntity == null){
+                return false;
+            }else{
+                return true;
             }
-            resData = sameRes.replace(/_/g, " ");;
-            return resData;
 
         }
     </script>
