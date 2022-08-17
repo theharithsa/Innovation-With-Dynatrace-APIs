@@ -63,6 +63,14 @@
                             <label>Select Timeframe</label>
                         </div>
                         <div class="input-field col s12">
+                            <p>
+                                <label>
+                                  <input type="checkbox" id="json"/>
+                                  <span>Include json in export</span>
+                                </label>
+                              </p>
+                        </div>
+                        <div class="input-field col s12">
                             <button class="btn waves-effect waves-light" id="fetch">
                                 Fetch Data
                             </button>
@@ -85,6 +93,7 @@
                             <th>Affected Entity</th>
                             <th>Event Type</th>
                             <th>Root Cause Availability</th>
+                            <th>Problem Json</th>
                             
                         </tr>
                     </thead>
@@ -146,6 +155,7 @@
             var timeframe = document.getElementById('timeframe').value
             var tenantURL = document.getElementById('tenant').value;
             var apiKey = document.getElementById('apiToken').value;
+            var retrieveJson = document.getElementById('json')
             console.log(tenantURL + '/api/v2/problems?from=' + timeframe + '&Api-Token=' + apiKey);
 
             getJSON(tenantURL + '/api/v2/problems?from=' + timeframe + '&Api-Token=' + apiKey,
@@ -160,12 +170,19 @@
                                 buttons: [
                                     'csv', 'excel', 'pdf'
                                 ],
+                                "columnDefs": [
+                                    { "visible": false, "targets": 9}
+                                ],
                             });
                             $('.buttons-csv, .buttons-pdf, .buttons-excel').addClass(
                                 'btn btn-primary mr-1');
                         }, 2000);
 
                         for (i = 0; i < requestJson.length; i++) {
+                            var rawJson = "NA";
+                            if (retrieveJson.checked == true){
+                                rawJson = requestJson[i];
+                            }
                             if (requestJson[i].hasOwnProperty("problemId")) {
                                 if (requestJson[i].entityTags.length == 0) {
                                     displayFormData(tenantURL, requestJson[i].problemId, requestJson[i].displayId, requestJson[i]
@@ -173,7 +190,7 @@
                                                 requestJson[i].startTime), convertMillis(requestJson[i]
                                                 .endTime), getEntityIDs(requestJson[i].affectedEntities),
                                                 requestJson[i].title, isRootCause(requestJson[i]
-                                                .rootCauseEntity));
+                                                .rootCauseEntity),rawJson);
 
                                 } else{
                                     displayFormData(tenantURL, requestJson[i].problemId, requestJson[i].displayId, requestJson[i]
@@ -181,7 +198,7 @@
                                                     requestJson[i].startTime), convertMillis(requestJson[i]
                                                     .endTime), getEntityIDs(requestJson[i].affectedEntities),
                                                     requestJson[i].title, isRootCause(requestJson[i]
-                                                .rootCauseEntity));                             
+                                                .rootCauseEntity),rawJson);                             
                                 } 
 
                             } else {
@@ -194,7 +211,7 @@
         });
 
         function displayFormData(tenantURL, problemID, displayName, sLevel, status, tags, startTime, endTime, affectedEntity, eventType,
-            rootCause) {
+            rootCause, rawJson) {
             var a = document.createElement("tr");
      
             var b = document.createElement("td");
@@ -236,6 +253,10 @@
             var hText = document.createTextNode(rootCause)
             h.appendChild(hText);
 
+            var k = document.createElement("td");
+            var kText = document.createTextNode(JSON.stringify(rawJson))
+            k.appendChild(kText);
+
             var place = document.getElementById('include');
             place.appendChild(a);
             a.appendChild(b);
@@ -247,6 +268,7 @@
             a.appendChild(g);
             a.appendChild(i);
             a.appendChild(h);
+            a.appendChild(k);
             
         }
 
