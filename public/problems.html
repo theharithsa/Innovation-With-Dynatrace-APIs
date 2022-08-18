@@ -61,6 +61,14 @@
                                 <option value="-1M">month</option>
                             </select>
                             <label>Select Timeframe</label>
+                            <p>Or</p>
+                            <div>
+                                <label>from</label>
+                                <input type="date" id="datepickerfrom">
+                                <label>to</label>
+                                <input type="date" id="datepickerto">
+                            </div>
+                            
                         </div>
                         <div class="input-field col s12">
                             <p>
@@ -165,13 +173,30 @@
             var apiKey = document.getElementById('apiToken').value;
             var retrieveJson = document.getElementById('json');
             var fields = "";
+            if (timeframe == null || timeframe == ''){
+                var today = new Date();
+                var date = today.getDate()+'/'+(today.getMonth()+1)+'/'+today.getFullYear();
+                var datePickerFrom = document.getElementById('datepickerfrom').value
+                var datePickerTo = document.getElementById('datepickerto').value
+                console.log(datePickerFrom)
+                from = datePickerFrom+"T00%3A00";
+                if(datePickerTo == date){
+                    console.log("true");
+                    to = "now";
+                }else{
+                    to = datePickerTo+"T00%3A00";
+                }    
+            }else{
+                from = timeframe;
+                to = "now";
+            }
             if(document.getElementById('evidenceImpact').checked == true){
                 fields = fields+"fields=evidenceDetails%2CimpactAnalysis&";
             }
             console.log(fields);
-            console.log(tenantURL + '/api/v2/problems?' + fields + 'from=' + timeframe + '&Api-Token=' + apiKey);
+            console.log(tenantURL + '/api/v2/problems?' + fields + 'from=' + from + "&to=" + to + '&Api-Token=' + apiKey);
 
-            getJSON(tenantURL + '/api/v2/problems?' + fields + 'from=' + timeframe + '&Api-Token=' + apiKey,
+            getJSON(tenantURL + '/api/v2/problems?' + fields + 'from=' + from + "&to=" + to + '&Api-Token=' + apiKey,
                 function (err, data) {
                     if (err !== null) {
                         alert('Something went wrong: ' + err);
