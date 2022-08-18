@@ -65,8 +65,14 @@
                         <div class="input-field col s12">
                             <p>
                                 <label>
+                                  <input type="checkbox" id="evidenceImpact" value="evidence"/>
+                                  <span>Include Evidence Details and Impact Analysis</span>
+                                </label>
+                              </p>
+                            <p>
+                                <label>
                                   <input type="checkbox" id="json"/>
-                                  <span>Include json in export</span>
+                                  <span>Include full problem json</span>
                                 </label>
                               </p>
                         </div>
@@ -93,6 +99,8 @@
                             <th>Affected Entity</th>
                             <th>Event Type</th>
                             <th>Root Cause Availability</th>
+                            <th>Evidence Details</th>
+                            <th>Impact Analysis</th>
                             <th>Problem Json</th>
                             
                         </tr>
@@ -155,33 +163,47 @@
             var timeframe = document.getElementById('timeframe').value
             var tenantURL = document.getElementById('tenant').value;
             var apiKey = document.getElementById('apiToken').value;
-            var retrieveJson = document.getElementById('json')
-            console.log(tenantURL + '/api/v2/problems?from=' + timeframe + '&Api-Token=' + apiKey);
+            var retrieveJson = document.getElementById('json');
+            var fields = "";
+            if(document.getElementById('evidenceImpact').checked == true){
+                fields = fields+"fields=evidenceDetails%2CimpactAnalysis&";
+            }
+            console.log(fields);
+            console.log(tenantURL + '/api/v2/problems?' + fields + 'from=' + timeframe + '&Api-Token=' + apiKey);
 
-            getJSON(tenantURL + '/api/v2/problems?from=' + timeframe + '&Api-Token=' + apiKey,
+            getJSON(tenantURL + '/api/v2/problems?' + fields + 'from=' + timeframe + '&Api-Token=' + apiKey,
                 function (err, data) {
                     if (err !== null) {
                         alert('Something went wrong: ' + err);
                     } else {
                         var requestJson = data.problems;
                         setTimeout(function () {
-                            $('#example').DataTable({
+                            var table = $('#example').DataTable({
                                 dom: 'Bfrtip',
                                 buttons: [
                                     'csv', 'excel', 'pdf'
                                 ],
-                                "columnDefs": [
-                                    { "visible": false, "targets": 9}
-                                ],
                             });
+                            if(document.getElementById("evidenceImpact").checked == false){
+                                table.columns( [9,10] ).visible( false );
+                            }
+                            if (retrieveJson.checked == false){
+                                table.columns( [11] ).visible( false );
+                            }
                             $('.buttons-csv, .buttons-pdf, .buttons-excel').addClass(
                                 'btn btn-primary mr-1');
                         }, 2000);
-
+                    
                         for (i = 0; i < requestJson.length; i++) {
                             var rawJson = "NA";
+                            var evidence = "NA"
+                            var impact = "NA"
                             if (retrieveJson.checked == true){
                                 rawJson = requestJson[i];
+                            }
+                            if (fields.length > 1){
+                                evidence = requestJson[i].evidenceDetails;
+                                impact = requestJson[i].impactAnalysis;
                             }
                             if (requestJson[i].hasOwnProperty("problemId")) {
                                 if (requestJson[i].entityTags.length == 0) {
@@ -190,7 +212,7 @@
                                                 requestJson[i].startTime), convertMillis(requestJson[i]
                                                 .endTime), getEntityIDs(requestJson[i].affectedEntities),
                                                 requestJson[i].title, isRootCause(requestJson[i]
-                                                .rootCauseEntity),rawJson);
+                                                .rootCauseEntity),evidence,impact,rawJson);
 
                                 } else{
                                     displayFormData(tenantURL, requestJson[i].problemId, requestJson[i].displayId, requestJson[i]
@@ -198,7 +220,7 @@
                                                     requestJson[i].startTime), convertMillis(requestJson[i]
                                                     .endTime), getEntityIDs(requestJson[i].affectedEntities),
                                                     requestJson[i].title, isRootCause(requestJson[i]
-                                                .rootCauseEntity),rawJson);                             
+                                                .rootCauseEntity),evidence,impact,rawJson);                             
                                 } 
 
                             } else {
@@ -211,7 +233,7 @@
         });
 
         function displayFormData(tenantURL, problemID, displayName, sLevel, status, tags, startTime, endTime, affectedEntity, eventType,
-            rootCause, rawJson) {
+            rootCause, evidence, impact, rawJson) {
             var a = document.createElement("tr");
      
             var b = document.createElement("td");
@@ -254,8 +276,16 @@
             h.appendChild(hText);
 
             var k = document.createElement("td");
-            var kText = document.createTextNode(JSON.stringify(rawJson))
+            var kText = document.createTextNode(JSON.stringify(evidence))
             k.appendChild(kText);
+
+            var l = document.createElement("td");
+            var lText = document.createTextNode(JSON.stringify(impact))
+            l.appendChild(lText);
+
+            var m = document.createElement("td");
+            var mText = document.createTextNode(JSON.stringify(rawJson))
+            m.appendChild(mText);
 
             var place = document.getElementById('include');
             place.appendChild(a);
@@ -269,6 +299,8 @@
             a.appendChild(i);
             a.appendChild(h);
             a.appendChild(k);
+            a.appendChild(l);
+            a.appendChild(m);
             
         }
 
